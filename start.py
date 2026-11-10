@@ -1,37 +1,41 @@
 # -*- coding: utf-8 -*-
-"""一键启动：python -X utf8 start.py [--port 8765]"""
+"""一键启动：python -X utf8 start.py [--port 8765] [--no-browser]
+
+端口策略：优先绑定 --port；被占用或属于系统保留段时，自动改用系统分配的空闲端口。
+"""
 from __future__ import annotations
 
 import argparse
 import os
 import sys
 import webbrowser
+from http.server import ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from server import BRAIN, DB_PATH, Handler  # noqa: E402
+
+
+def bind(preferred: int | None):
+    """返回 (server, url)。preferred=None 表示直接让系统分配。"""
+    if preferred:
+        try:
+            srv = ThreadingHTTPServer(("127.0.0.1", preferred), Handler)
+            return srv, f"http://127.0.0.1:{preferred}/"
+        except OSError:
+            pass
+    srv = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    return srv, f"http://127.0.0.1:{srv.server_address[1]}/"
+
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--port", type=int, default=8765)
+    ap = argparse.ArgumentParser(description="Stepwise Learn 本地学习应用")
+    ap.add_argument("--port", type=int, default=8765,
+                    help="首选端口，默认 8765；被占用时自动换端口。传 0 表示直接随机分配")
     ap.add_argument("--no-browser", action="store_true")
     args = ap.parse_args()
 
-    from server import BRAIN, DB_PATH, Handler
-    from http.server import ThreadingHTTPServer
-
-    srv = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-    port = srv.server_address[1] if args.port == 0 else args.port
-    if args.port == 0:
-        url = f"http://127.0.0.1:{port}/"
-    else:
-        # 指定端口被占用/被系统保留时，自动退到系统分配端口
-        try:
-            srv.server_close()
-            srv = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-            url = f"http://127.0.0.1:{args.port}/"
-        except OSError:
-            srv = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-            url = f"http://127.0.0.1:{srv.server_address[1]}/"
+    srv, url = bind(None if args.port == 0 else args.port)
 
     print("=" * 56)
     print("  Stepwise · 一步步带你学会")

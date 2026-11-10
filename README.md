@@ -2,19 +2,36 @@
 
 一个**完全在本机运行**的学习应用。照着 Sia（AskSia）那套教学法做的：**先给提示 → 一步步演练 → 反过来考你 → 几天后再回来复习**，而不是一上来把答案甩给你。
 
+打开就是网页，离线可用，零依赖，不注册账号，数据只存本机。
+
+## 环境要求
+
+- **Python 3.9 或更新版本**（只用标准库，没有 `requirements.txt`，不用 pip install）
+- 一个现代浏览器（Chrome / Edge / Firefox / Safari 近几年版本都行）
+- Windows / macOS / Linux 都可以
+
+检查 Python：`python --version` 或 `python3 --version`。
+Windows 若提示找不到 `python`，试试 `py -3 --version`；都没有就去 python.org 装一个，安装时勾选 **Add Python to PATH**。
+
 ## 30 秒跑起来
 
 ```bash
-cd projects/stepwise-learn
+git clone https://github.com/wuxuanren2008-ux/stepwise-learn.git
+cd stepwise-learn
 python -X utf8 start.py
 ```
 
-Windows 也可以直接双击 `start.bat`。启动后浏览器会自动打开 `http://127.0.0.1:8765/`。
+macOS / Linux 把 `python` 换成 `python3` 即可。Windows 也可以直接双击 `start.bat`。
 
-- **零依赖**：只用 Python 标准库，不用 pip install、不用 Node、不用联网、不用注册账号。
-- **零外传**：所有进度只写在本机 `data/learn.db`，没有遥测、不上传任何内容。
-- 端口被占用会自动换一个，实际地址看启动时的输出。
+启动后浏览器会自动打开；没自动开就手动访问启动时打印的地址（默认 `http://127.0.0.1:8765/`）。
+
+- **零依赖**：不用 pip、不用 Node、不用联网、不用注册账号。
+- **零外传**：进度只写在本机 `data/learn.db`，没有遥测、不上传任何内容。
+- 端口被占用会自动换一个，实际地址以启动时输出为准。
 - 停止：按 `Ctrl+C`。
+- 首次启动会自动创建 `data/` 目录，无需手动建。
+
+> 排查：若 `python`/`py` 都找不到，先装 Python 并勾选 Add to PATH；若浏览器没自动打开，直接复制命令行里那行网址。
 
 ## 怎么用它学一个知识点
 
@@ -43,7 +60,7 @@ Windows 也可以直接双击 `start.bat`。启动后浏览器会自动打开 `h
 
 想让讲解更灵活，可以接任意 OpenAI 兼容接口：
 
-```bash
+```powershell
 # Windows PowerShell
 $env:LEARN_API_BASE = "https://api.example.com"   # 不含 /v1，代码会补
 $env:LEARN_API_KEY  = "[API_KEY]"
@@ -60,7 +77,7 @@ python3 -X utf8 start.py
 ```
 
 - 只从环境变量读 key，**不写进代码、不写进数据库、不写进日志**。
-- 接口超时/报错会**自动回退离线**，学习流程不会中断。
+- 接口超时/报错会**自动回退离线**，学习流程不会中断；首次回退可能等待超时（默认 12 秒，可用 `LEARN_API_TIMEOUT` 调小）。
 - 有条硬护栏：即使 AI 想提前剧透，提示阶段出现过任何未揭示的步骤内容，就丢弃该回复改用离线讲解。
 
 ## 自检
@@ -84,6 +101,7 @@ python -X utf8 selftest.py
 | `store.py` | SQLite：会话、事件、掌握度、复习队列 |
 | `selftest.py` | 端到端自检 |
 | `PLAN.md` | 实施计划 |
+| `preview.png` | 界面预览图 |
 
 ## 和 Sia 的对照
 
