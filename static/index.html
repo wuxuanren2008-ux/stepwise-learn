@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stepwise · 一步步带你学会</title>
+<style>
+  :root{
+    --bg:#0f1117; --panel:#171a23; --panel2:#1e2230; --line:#2a3040;
+    --text:#e8ecf5; --muted:#8b93a7; --accent:#7c8cff; --accent2:#4fd1a5;
+    --warn:#ffb454; --danger:#ff7a7a; --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.7}
+  a{color:var(--accent)}
+  .wrap{max-width:1280px;margin:0 auto;padding:22px;display:grid;grid-template-columns:270px 1fr 250px;gap:18px;min-height:100vh}
+  header{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:14px 20px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+  header h1{font-size:19px;margin:0;letter-spacing:.5px}
+  header .tag{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:3px 9px;border-radius:20px}
+  header .spacer{flex:1}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);margin:0 0 12px}
+  .course{margin-bottom:16px}
+  .course-title{font-size:14px;font-weight:700;padding:7px 9px;background:var(--panel2);border-radius:9px;display:flex;gap:8px;align-items:center}
+  .course-title .ico{color:var(--accent);font-size:17px}
+  .topic{display:block;width:100%;text-align:left;background:none;border:0;border-left:2px solid transparent;color:var(--text);padding:9px 10px;cursor:pointer;border-radius:6px;font-size:13.5px;transition:.15s}
+  .topic:hover{background:var(--panel2);border-left-color:var(--accent)}
+  .topic.active{background:var(--panel2);border-left-color:var(--accent);color:#fff}
+  .topic .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--line);margin-right:8px}
+  .topic.done .dot{background:var(--accent2)}
+  .board{grid-column:2;display:flex;flex-direction:column;gap:14px;min-width:0}
+  .stage{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;min-height:340px}
+  .stage-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+  .phase{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:var(--panel2);color:var(--accent);border:1px solid var(--line)}
+  .phase.mastered{color:var(--accent2)}
+  .goal{font-size:12.5px;color:var(--muted)}
+  .cue{background:var(--panel2);border-left:3px solid var(--warn);padding:12px 15px;border-radius:8px;margin:0 0 16px;font-size:14px}
+  .board-lines{display:flex;flex-direction:column;gap:9px;margin:0 0 16px}
+  .bline{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 14px;font-size:15px;animation:reveal .35s ease both}
+  .bline .n{color:var(--accent);font-size:12px;margin-right:9px}
+  @keyframes reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .narration{white-space:pre-wrap;background:linear-gradient(135deg,#1b2030,#191d29);border:1px solid var(--line);border-radius:10px;padding:15px 17px;font-size:14.5px}
+  .mis{color:var(--warn);font-size:12.5px;margin-top:10px}
+  .feedback{font-size:13.5px;color:var(--accent2);margin-top:10px}
+  .options{display:grid;gap:9px;margin-top:14px}
+  .opt{background:var(--panel2);border:1px solid var(--line);color:var(--text);text-align:left;padding:12px 14px;border-radius:9px;cursor:pointer;font-size:14px;transition:.15s}
+  .opt:hover{border-color:var(--accent);background:#232a3d}
+  .opt.sel{border-color:var(--accent);box-shadow:0 0 0 2px rgba(124,140,255,.2)}
+  .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+  button.btn{background:var(--accent);color:#0d1020;border:0;padding:10px 17px;border-radius:9px;font-weight:700;font-size:13.5px;cursor:pointer}
+  button.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  button.btn:disabled{opacity:.45;cursor:not-allowed}
+  .progress{height:5px;background:var(--panel2);border-radius:5px;overflow:hidden;margin-top:14px}
+  .progress>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+  .side{display:flex;flex-direction:column;gap:14px}
+  .stat{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .stat b{color:var(--accent2)}
+  .review{background:var(--panel2);border-radius:8px;padding:9px 11px;font-size:12.5px;margin-bottom:8px}
+  .review.due{border:1px solid var(--warn)}
+  .muted{color:var(--muted);font-size:12.5px}
+  .empty{color:var(--muted);font-size:13px;padding:14px;text-align:center}
+  @media(max-width:1000px){.wrap{grid-template-columns:1fr}.board{grid-column:1}.side{flex-direction:row;flex-wrap:wrap}.side .card{flex:1;min-width:220px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Stepwise · 一步步带你学会</h1>
+    <span class="tag" id="mode">离线模式</span>
+    <span class="spacer"></span>
+    <span class="muted" id="hintline">提示 → 演练 → 检查站 → 测验 → 几天后再复习</span>
+    <button class="btn ghost" id="reset">清空进度</button>
+  </header>
+
+  <aside class="card" id="sidebar">
+    <h2>课程</h2>
+    <div id="courses"></div>
+  </aside>
+
+  <main class="board">
+    <section class="card stage" id="stage">
+      <div class="empty">从左边选一个知识点开始。我不会一上来给答案——先问你一个问题。</div>
+    </section>
+  </main>
+
+  <aside class="side">
+    <div class="card">
+      <h2>掌握度</h2>
+      <div id="stats"></div>
+    </div>
+    <div class="card">
+      <h2>今日复习</h2>
+      <div id="reviews"></div>
+    </div>
+    <div class="card">
+      <h2>接下来的复习</h2>
+      <div id="upcoming"></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+let sessionId = null, selected = null, chosen = null, current = null, courses = [];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nl = s => esc(s).replace(/\n/g,'<br>');
+
+async function api(path, body){
+  const r = await fetch(path, body ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)} : {});
+  return r.json();
+}
+
+async function loadCourses(){
+  const d = await api('/api/courses');
+  courses = d.courses || [];
+  $('courses').innerHTML = courses.map(c => `
+    <div class="course">
+      <div class="course-title"><span class="ico">${esc(c.icon)}</span>${esc(c.title)}</div>
+      ${c.topics.map(t => `<button class="topic" data-id="${esc(t.id)}" data-title="${esc(t.title)}">
+        <span class="dot"></span>${esc(t.title)}<span class="muted"> · ${t.step_count} 步</span></button>`).join('')}
+    </div>`).join('');
+  document.querySelectorAll('.topic').forEach(b => b.onclick = () => start(b.dataset.id));
+  renderStats(d.progress); renderReviews(d.due_reviews, d.upcoming);
+  const m = await api('/api/progress');
+  Object.entries(m.mastery || {}).forEach(([id,v]) => {
+    const el = document.querySelector(`.topic[data-id="${id}"]`);
+    if (el && v.mastered) el.classList.add('done');
+  });
+}
+
+function renderStats(p){
+  $('stats').innerHTML = `
+    <div class="stat"><span>已开始</span><b>${p.topics_started||0}</b></div>
+    <div class="stat"><span>已掌握</span><b>${p.topics_mastered||0}</b></div>
+    <div class="stat"><span>作答次数</span><b>${p.total_attempts||0}</b></div>
+    <div class="stat"><span>错步记录</span><b>${p.wrong_steps_total||0}</b></div>`;
+}
+function renderReviews(due, upcoming){
+  $('reviews').innerHTML = (due && due.length) ? due.map(r => `
+    <div class="review due">⏰ ${esc(topicName(r.topic_id))}
+      <div><button class="btn ghost" style="padding:4px 9px;font-size:12px" onclick="review('${esc(r.topic_id)}',true)">想起来了</button>
+      <button class="btn ghost" style="padding:4px 9px;font-size:12px" onclick="review('${esc(r.topic_id)}',false)">忘了</button></div>
+    </div>`).join('') : '<div class="muted">今天没有到期的复习 ✓</div>';
+  $('upcoming').innerHTML = (upcoming && upcoming.length) ? upcoming.slice(0,8).map(r =>
+    `<div class="review">${esc(topicName(r.topic_id))} · ${r.days_left} 天后</div>`).join('') : '<div class="muted">完成一个知识点后会自动排期</div>';
+}
+function topicName(id){ for(const c of courses) for(const t of c.topics) if(t.id===id) return t.title; return id; }
+
+async function review(id, correct){
+  await api('/api/review',{topic_id:id,correct});
+  loadCourses();
+}
+
+async function start(id){
+  selected = id; chosen = null;
+  document.querySelectorAll('.topic').forEach(b => b.classList.toggle('active', b.dataset.id===id));
+  const f = await api('/api/start',{topic_id:id});
+  sessionId = f.session_id; render(f);
+}
+
+async function act(action, payload){
+  const f = await api('/api/action',{session_id:sessionId,action,payload:payload||{}});
+  render(f);
+}
+
+function render(f){
+  current = f; chosen = null;
+  if(f.mode) $('mode').textContent = f.mode==='offline' ? '离线模式（不联网）' : (f.mode==='api' ? 'AI 模式' : 'AI 回退离线');
+  const phaseNames = {hint:'① 提示',walkthrough:'② 演练',checkpoint:'③ 检查站',quiz:'④ 测验',mastered:'✓ 已掌握'};
+  let html = `<div class="stage-head">
+      <span class="phase ${f.phase==='mastered'?'mastered':''}">${phaseNames[f.phase]||f.phase}</span>
+      <span class="goal">${esc(f.course_title)} · ${esc(f.title)} ｜ 目标：${esc(f.goal)}</span>
+    </div>`;
+  if(f.cue && ['hint','walkthrough'].includes(f.phase))
+    html += `<div class="cue">${nl(f.cue)}</div>`;
+  if(f.board && f.board.length)
+    html += `<div class="board-lines">${f.board.map((b,i)=>`<div class="bline"><span class="n">${String(i+1).padStart(2,'0')}</span>${esc(b)}</div>`).join('')}</div>`;
+  if(f.narration) html += `<div class="narration">${nl(f.narration)}</div>`;
+  if(f.misconception && f.phase==='walkthrough') html += `<div class="mis">⚠ 常见卡点：${esc(f.misconception)}</div>`;
+  if(f.feedback) html += `<div class="feedback">${esc(f.feedback)}</div>`;
+  if(f.options && f.options.length){
+    html += `<div class="options">${f.options.map((o,i)=>`<button class="opt" data-i="${i}">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}</div>`;
+  }
+  html += `<div class="actions">${(f.next_actions||[]).map(a=>{
+      const needsAnswer = ['answer','quiz_answer'].includes(a.action);
+      return `<button class="btn ${a.action==='hint'?'ghost':''}" data-action="${a.action}" ${needsAnswer?'disabled':''}>${esc(a.label)}</button>`;
+    }).join('')}</div>`;
+  html += `<div class="progress"><i style="width:${(f.progress||0)*100}%"></i></div>`;
+  $('stage').innerHTML = html;
+
+  document.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    chosen = Number(b.dataset.i);
+    document.querySelectorAll('.opt').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    document.querySelectorAll('.btn[data-action="answer"],.btn[data-action="quiz_answer"]').forEach(x => x.disabled=false);
+  });
+  document.querySelectorAll('.btn[data-action]').forEach(b => b.onclick = () => {
+    const a = b.dataset.action;
+    act(a, ['answer','quiz_answer'].includes(a) ? {index:chosen} : {});
+  });
+  if(f.phase==='mastered') loadCourses();
+}
+
+$('reset').onclick = async () => {
+  if(!confirm('清空本地学习进度？此操作只影响本机数据。')) return;
+  await api('/api/reset',{});
+  sessionId=null; current=null;
+  $('stage').innerHTML = '<div class="empty">进度已清空。从左边选一个知识点重新开始。</div>';
+  loadCourses();
+};
+loadCourses();
+</script>
+</body>
+</html>
